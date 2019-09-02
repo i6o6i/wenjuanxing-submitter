@@ -72,12 +72,59 @@ class WenJuanXing(object):
 
 
 def main():
-    print('输入验证码时，先关闭图片窗口再输入。')
-    q_num = input('问卷号：')
-    q_data = input('submitdata（自行理解）：')
-    iter = int(input('次数：'))
-    wjx = WenJuanXing(q_num, q_data)
-    for i in range(iter):
+    #print('输入验证码时，先关闭图片窗口再输入。')
+    #q_num = input('问卷号：')
+    #q_data = input('submitdata（自行理解）：')
+    #iter = int(input('次数：'))
+    l=[ [1,2,3,1,0.5],
+        [4,2,1,1,5],
+        [6,4],
+        [7,3],
+        [7,3],
+        [0.5,0.6,2,1],#6
+        [4,9,3,2],
+        [1,4,3,1],
+        [6,3,1],
+        [2,2,1,0.5],
+        [4,3,2],#11
+        [2,5,5],
+        [1,2,5,1.5],
+        [5,4,3,1],
+        [1,2,3,2,1],
+        [1,1,1,2,2,3],
+        [3,1,2],
+        [5,4,3,2,1],
+        [5,4,3,2,1],
+      ]
+    times=10
+    for idx,i in enumerate(l):
+        s=sum(i)
+        tmp=[x/s for x in i]
+        for idx2,k in enumerate(tmp):
+            if idx2 >= 1:
+                #print(tmp[idx2-1],tmp[idx2])
+                tmp[idx2]=tmp[idx2]+tmp[idx2-1]
+        l[idx]=tmp
+        #print(l[idx])
+    #print(l)
+    for num in range(times):
+        result=[]
+        for i in l:
+            #print(i)
+            r=random.random()
+            #type(i)
+            for idx,k in enumerate(i):
+                if r < k:
+                    result+=[idx]
+                    break
+                #code.interact(local=locals())
+    #code.interact(local=locals())
+        for idx,val in enumerate(result):
+            result[idx]=str(idx+1)+'$'+str(val+1)
+        q_num=str(111)
+        q_data='}'.join(result)
+        print(q_data)
+        wjx = WenJuanXing(q_num, q_data)
         wjx.resetData()
         wjx.antiSpam()
         response = wjx.submitForm()
