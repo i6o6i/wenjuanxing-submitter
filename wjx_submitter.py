@@ -1,9 +1,12 @@
 import requests
+import random
 import time
 from urllib.parse import urlencode
 import cv2
 from PIL import Image
 import os
+import code
+import pytesseract
 
 
 class WenJuanXing(object):
@@ -39,7 +42,7 @@ class WenJuanXing(object):
             'submittype': self.submittype,
             'curID': self.curID,
             't': self.t,
-            'starttime':self.starttime,
+            'starttime': self.starttime,
             'rn': self.rn,
             'validate_text': self.validate_text
         }
@@ -51,6 +54,8 @@ class WenJuanXing(object):
             f.write(response.content)
         # TODO: try captcha solver
         Image.open('tmp_img.gif').convert('RGB').save('tmp_img.jpg')
+        '''
+        
         img = cv2.imread('tmp_img.jpg', cv2.IMREAD_COLOR)
         os.remove('tmp_img.gif')
         os.remove('tmp_img.jpg')
@@ -58,7 +63,24 @@ class WenJuanXing(object):
         cv2.waitKey(0)
         self.validate_text = input('验证码: ')
         cv2.destroyAllWindows()
-
+        '''
+        img = Image.open('tmp_img.jpg')
+        img = img.convert('RGB')
+        img = img.convert('L')
+        threshold = 20
+        table = []
+        for i in range(256):
+            if i < threshold:
+                table.append(0)
+            else:
+                table.append(1)
+        img = img.point(table, '1')
+        img = img.convert('L')
+        #img.show()
+        self.validate_text = ''.join(pytesseract.image_to_string(img).split())
+        print(self.validate_text)
+        #string = "EJ RM"
+        #print(''.join(string.split()))
     def submitForm(self):
         url = self.base_submit + urlencode(self.stringParams())
         response = self.sess.post(url, data={'submitdata': self.submitdata})
@@ -72,58 +94,59 @@ class WenJuanXing(object):
 
 
 def main():
-    #print('输入验证码时，先关闭图片窗口再输入。')
-    #q_num = input('问卷号：')
-    #q_data = input('submitdata（自行理解）：')
-    #iter = int(input('次数：'))
-    l=[ [1,2,3,1,0.5],
-        [4,2,1,1,5],
-        [6,4],
-        [7,3],
-        [7,3],
-        [0.5,0.6,2,1],#6
-        [4,9,3,2],
-        [1,4,3,1],
-        [6,3,1],
-        [2,2,1,0.5],
-        [4,3,2],#11
-        [2,5,5],
-        [1,2,5,1.5],
-        [5,4,3,1],
-        [1,2,3,2,1],
-        [1,1,1,2,2,3],
-        [3,1,2],
-        [5,4,3,2,1],
-        [5,4,3,2,1],
-      ]
-    times=10
-    for idx,i in enumerate(l):
-        s=sum(i)
-        tmp=[x/s for x in i]
-        for idx2,k in enumerate(tmp):
+    # print('输入验证码时，先关闭图片窗口再输入。')
+    # q_num = input('问卷号：')
+    # q_data = input('submitdata（自行理解）：')
+    # iter = int(input('次数：'))
+    l = [[1, 2, 3, 1, 0.5],
+         [4, 2, 1, 1, 5],
+         [6, 4],
+         [7, 3],
+         [7, 3],
+         [0.5, 0.6, 2, 1],  # 6
+         [4, 9, 3, 2],
+         [1, 4, 3, 1],
+         [6, 3, 1],
+         [2, 2, 1, 0.5],
+         [4, 3, 2],  # 11
+         [2, 5, 5],
+         [1, 2, 5, 1.5],
+         [5, 4, 3, 1],
+         [1, 2, 3, 2, 1],
+         [1, 1, 1, 2, 2, 3],
+         [3, 1, 2],
+         [5, 4, 3, 2, 1],
+         [5, 4, 3, 2, 1],
+         ]
+    times = 1000
+    for idx, i in enumerate(l):
+        s = sum(i)
+        tmp = [x / s for x in i]
+        for idx2, k in enumerate(tmp):
             if idx2 >= 1:
-                #print(tmp[idx2-1],tmp[idx2])
-                tmp[idx2]=tmp[idx2]+tmp[idx2-1]
-        l[idx]=tmp
-        #print(l[idx])
-    #print(l)
+                # print(tmp[idx2-1],tmp[idx2])
+                tmp[idx2] = tmp[idx2] + tmp[idx2 - 1]
+        l[idx] = tmp
+        # print(l[idx])
+    # print(l)
     for num in range(times):
-        result=[]
+        result = []
         for i in l:
-            #print(i)
-            r=random.random()
-            #type(i)
-            for idx,k in enumerate(i):
+            # print(i)
+            r = random.random()
+            # type(i)
+            for idx, k in enumerate(i):
                 if r < k:
-                    result+=[idx]
+                    result += [idx]
                     break
-                #code.interact(local=locals())
-    #code.interact(local=locals())
-        for idx,val in enumerate(result):
-            result[idx]=str(idx+1)+'$'+str(val+1)
-        q_num=str(111)
-        q_data='}'.join(result)
+                # code.interact(local=locals())
+        # code.interact(local=locals())
+        for idx, val in enumerate(result):
+            result[idx] = str(idx + 1) + '$' + str(val + 1)
+        q_num = str(45028731)
+        q_data = '}'.join(result)
         print(q_data)
+
         wjx = WenJuanXing(q_num, q_data)
         wjx.resetData()
         wjx.antiSpam()
